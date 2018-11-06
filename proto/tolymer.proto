@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package tolymer;
+
+service Hello {
+  rpc Greet(GreetRequest) returns (GreetResponse) {}
+}
+
+message GreetRequest {
+  uint64 id = 1;
+}
+
+message GreetResponse {
+  uint64 id = 1;
+  string name = 2;
+}
