@@ -48,6 +48,7 @@ GEM
     coderay (1.1.2)
     concurrent-ruby (1.1.1)
     crass (1.0.4)
+    diffy (3.2.1)
     erubi (1.7.1)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
@@ -118,6 +119,9 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.19.0, < 2.0)
     rake (12.3.1)
+    ridgepole (0.7.4)
+      activerecord (>= 5.0.1, < 6)
+      diffy
     slop (4.6.2)
     sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
@@ -143,6 +147,7 @@ DEPENDENCIES
   pry-byebug
   pry-rails
   rails (= 5.2.1)
+  ridgepole
 
 BUNDLED WITH
    1.16.1
