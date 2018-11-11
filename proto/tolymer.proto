@@ -1,16 +1,133 @@
 syntax = "proto3";
 
-package tolymer;
+package tolymer.v1;
 
-service Hello {
-  rpc Greet(GreetRequest) returns (GreetResponse) {}
+service Events {
+  rpc GetEvent (GetEventRequest) returns (GetEventResponse);
+  rpc CreateEvent (CreateEventRequest) returns (CreateEventResponse);
+  rpc UpdateEvent (UpdateEventRequest) returns (UpdateEventResponse);
+
+  rpc CreateGame (CreateGameRequest) returns (CreateGameResponse);
+  rpc UpdateGame (UpdateGameRequest) returns (UpdateGameResponse);
+  rpc DeleteGame (DeleteGameRequest) returns (DeleteGameResponse);
+
+  rpc CreateTip (CreateTipRequest) returns (CreateTipResponse);
+  rpc UpdateTip (UpdateTipRequest) returns (UpdateTipResponse);
+  rpc DeleteTip (DeleteTipRequest) returns (DeleteTipResponse);
 }
 
-message GreetRequest {
-  uint64 id = 1;
+message CreateEventRequest {
+  string title = 1;
+  string description = 2;
+  string date = 3;
+  repeated string participants = 4;
 }
 
-message GreetResponse {
-  uint64 id = 1;
+message CreateEventResponse {
+  string token = 1;
+}
+
+message GetEventRequest {
+  string token = 1;
+}
+
+message GetEventResponse {
+  Event event = 1;
+}
+
+message UpdateEventRequest {
+  string token = 1;
+  string title = 2;
+  string description = 3;
+  string date = 4;
+  repeated string participants = 5;
+}
+
+message UpdateEventResponse {
+  bool result = 1;
+}
+
+message CreateGameRequest {
+  string token = 1;
+  repeated Score scores = 2;
+}
+
+message CreateGameResponse {
+  int64 game_id = 1;
+}
+
+message UpdateGameRequest {
+  string token = 1;
+  int64 game_id = 2;
+  repeated Score scores = 3;
+}
+
+message UpdateGameResponse {
+  bool result = 1;
+}
+
+message DeleteGameRequest {
+  string token = 1;
+  int64 game_id = 2;
+}
+
+message DeleteGameResponse {
+  bool result = 1;
+}
+
+message CreateTipRequest {
+  string token = 1;
+  repeated Tip tips = 2;
+}
+
+message CreateTipResponse {
+  int64 game_id = 1;
+}
+
+message UpdateTipRequest {
+  string token = 1;
+  repeated Tip tips = 2;
+}
+
+message UpdateTipResponse {
+  bool result = 1;
+}
+
+message DeleteTipRequest {
+  string token = 1;
+}
+
+message DeleteTipResponse {
+  bool result = 1;
+}
+
+message Event {
+  string token = 1;
+  string title = 2;
+  string description = 3;
+  string date = 4;
+  repeated Participant participants = 5;
+  repeated Game games = 6;
+  repeated Tip tips = 7;
+}
+
+message Participant {
+  int64 id = 1;
   string name = 2;
+}
+
+message Game {
+  int64 id = 1;
+  int64 event_id = 2;
+  repeated Score scores = 3;
+}
+
+message Score {
+  int64 participant_id = 1;
+  int32 point = 2;
+}
+
+message Tip {
+  int64 participant_id = 1;
+  int32 point = 2;
 }
