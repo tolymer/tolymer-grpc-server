@@ -15,15 +15,15 @@ module Tolymer
         self.unmarshal_class_method = :decode
         self.service_name = 'tolymer.v1.Events'
 
-        rpc :GetEvent, GetEventRequest, GetEventResponse
-        rpc :CreateEvent, CreateEventRequest, CreateEventResponse
-        rpc :UpdateEvent, UpdateEventRequest, UpdateEventResponse
-        rpc :CreateGame, CreateGameRequest, CreateGameResponse
-        rpc :UpdateGame, UpdateGameRequest, UpdateGameResponse
-        rpc :DeleteGame, DeleteGameRequest, DeleteGameResponse
-        rpc :CreateTip, CreateTipRequest, CreateTipResponse
-        rpc :UpdateTip, UpdateTipRequest, UpdateTipResponse
-        rpc :DeleteTip, DeleteTipRequest, DeleteTipResponse
+        rpc :GetEvent, GetEventRequest, Event
+        rpc :CreateEvent, CreateEventRequest, Event
+        rpc :UpdateEvent, UpdateEventRequest, Event
+        rpc :CreateGame, CreateGameRequest, Game
+        rpc :UpdateGame, UpdateGameRequest, Game
+        rpc :DeleteGame, DeleteGameRequest, Google::Protobuf::Empty
+        rpc :CreateTip, CreateTipRequest, Tip
+        rpc :UpdateTip, UpdateTipRequest, Tip
+        rpc :DeleteTip, DeleteTipRequest, Google::Protobuf::Empty
       end
 
       Stub = Service.rpc_stub_class

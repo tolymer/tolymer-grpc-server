@@ -16,11 +16,19 @@ describe EventsService do
   describe '#get_event' do
     let(:rpc_name) { :get_event }
     let(:event) { FactoryBot.create(:event) }
-    let(:message) { Tolymer::V1::GetEventRequest.new(token: event.token) }
+    let(:token) { event.token }
+    let(:message) { Tolymer::V1::GetEventRequest.new(event_token: token) }
 
-    it do
-      expect(response).to be_a Tolymer::V1::GetEventResponse
-      expect(response.event.title).to eq event.title
+    it 'returns a Event' do
+      expect(response).to be_a Tolymer::V1::Event
+      expect(response.title).to eq event.title
+    end
+
+    context "when specified token does not exist" do
+      let(:token) { 'x' }
+      it 'raises GRPC::NotFound' do
+        expect { response }.to raise_error GRPC::NotFound
+      end
     end
   end
 end

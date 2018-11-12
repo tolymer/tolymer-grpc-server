@@ -3,7 +3,7 @@ class EventsService < Gruf::Controllers::Base
 
   def get_event
     event = find_event
-    Tolymer::V1::GetEventResponse.new(event: event.to_proto)
+    event.to_proto
   end
 
   def create_event
@@ -33,6 +33,8 @@ class EventsService < Gruf::Controllers::Base
   private
 
   def find_event
-    Event.find_by(token: request.message.token)
+    Event.find_by!(token: request.message.event_token)
+  rescue ActiveRecord::RecordNotFound => err
+    fail!(:not_found, :event_not_found, 'Invalid event token')
   end
 end
