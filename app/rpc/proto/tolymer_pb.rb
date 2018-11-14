@@ -4,11 +4,15 @@
 require 'google/protobuf'
 
 require 'google/protobuf/empty_pb'
+require 'google/protobuf/field_mask_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "tolymer.v1.Date" do
     optional :year, :int32, 1
     optional :month, :int32, 2
     optional :day, :int32, 3
+  end
+  add_message "tolymer.v1.GetEventRequest" do
+    optional :event_token, :string, 1
   end
   add_message "tolymer.v1.CreateEventRequest" do
     optional :title, :string, 1
@@ -16,11 +20,12 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :date, :message, 3, "tolymer.v1.Date"
     repeated :participants, :string, 4
   end
-  add_message "tolymer.v1.GetEventRequest" do
-    optional :event_token, :string, 1
-  end
   add_message "tolymer.v1.UpdateEventRequest" do
-    optional :event, :message, 1, "tolymer.v1.Event"
+    optional :event_token, :string, 1
+    optional :title, :string, 2
+    optional :description, :string, 3
+    optional :date, :message, 4, "tolymer.v1.Date"
+    optional :update_mask, :message, 5, "google.protobuf.FieldMask"
   end
   add_message "tolymer.v1.CreateGameRequest" do
     optional :event_token, :string, 1
@@ -76,8 +81,8 @@ end
 module Tolymer
   module V1
     Date = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.Date").msgclass
-    CreateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateEventRequest").msgclass
     GetEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.GetEventRequest").msgclass
+    CreateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateEventRequest").msgclass
     UpdateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateEventRequest").msgclass
     CreateGameRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateGameRequest").msgclass
     UpdateGameRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateGameRequest").msgclass

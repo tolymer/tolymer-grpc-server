@@ -3,6 +3,7 @@ syntax = "proto3";
 package tolymer.v1;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 service Events {
   rpc GetEvent (GetEventRequest) returns (Event);
@@ -24,6 +25,10 @@ message Date {
   int32 day = 3;
 }
 
+message GetEventRequest {
+  string event_token = 1;
+}
+
 message CreateEventRequest {
   string title = 1;
   string description = 2;
@@ -31,12 +36,12 @@ message CreateEventRequest {
   repeated string participants = 4;
 }
 
-message GetEventRequest {
-  string event_token = 1;
-}
-
 message UpdateEventRequest {
-  Event event = 1;
+  string event_token = 1;
+  string title = 2;
+  string description = 3;
+  Date date = 4;
+  google.protobuf.FieldMask update_mask = 5;
 }
 
 message CreateGameRequest {

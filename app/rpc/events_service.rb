@@ -21,6 +21,27 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def update_event
+    m = request.message
+    event = find_event
+
+    if m.update_mask.nil? || m.update_mask.paths.blank?
+      fail!(:bad_request, 'update_mask is required.')
+    end
+
+    if m.update_mask.paths.include?('title') && m.title.present?
+      event.title = m.title
+    end
+
+    if m.update_mask.paths.include?('description')
+      event.description = m.description || ''
+    end
+
+    if m.update_mask.paths.include?('date') && !m.date.nil?
+      event.date = Date.new(m.date.year, m.date.month, m.date.day)
+    end
+
+    event.save!
+    event.to_proto
   end
 
   def create_game
