@@ -1,7 +1,7 @@
 create_table 'tips', force: :cascade do |t|
   t.bigint  'event_id',       null: false
   t.bigint  'participant_id', null: false
-  t.integer 'point',          null: false
+  t.decimal 'point',          null: false, precision: 6, scale: 1
 
   t.timestamps
 end

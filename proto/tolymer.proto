@@ -85,10 +85,10 @@ message Game {
 
 message Score {
   int64 participant_id = 1;
-  int32 point = 2;
+  float point = 2;
 }
 
 message Tip {
   int64 participant_id = 1;
-  int32 point = 2;
+  float point = 2;
 }
