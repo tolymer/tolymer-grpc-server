@@ -11,13 +11,15 @@ class EventsService < Gruf::Controllers::Base
     event = Event.create!(
       title: m.title,
       description: m.description,
-      date: Date.new(m.date.year, m.date.month, m.date.day),
+      date: m.date ? Date.new(m.date.year, m.date.month, m.date.day) : nil,
     )
     m.participants.each do |name|
       event.participants.create!(name: name)
     end
 
     event.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def update_event
@@ -42,6 +44,8 @@ class EventsService < Gruf::Controllers::Base
 
     event.save!
     event.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def create_game

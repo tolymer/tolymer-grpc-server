@@ -57,6 +57,16 @@ describe EventsService do
       expect(response.games).to eq []
       expect(response.tips).to eq []
     end
+
+    context 'with invalid params' do
+      let(:request_message) do
+        Tolymer::V1::CreateEventRequest.new
+      end
+
+      it 'raises GRPC::InvalidArgument' do
+        expect { response }.to raise_error GRPC::InvalidArgument
+      end
+    end
   end
 
   describe '#update_event' do

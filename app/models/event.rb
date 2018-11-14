@@ -1,5 +1,10 @@
 class Event < ApplicationRecord
+  MAX_TITLE_LENGTH = 100
+
   has_many :participants
+
+  validates :title, presence: true, length: { maximum: MAX_TITLE_LENGTH }
+  validates :date, presence: true
 
   before_create :set_token
 
