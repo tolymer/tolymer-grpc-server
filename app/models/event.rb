@@ -1,4 +1,6 @@
 class Event < ApplicationRecord
+  has_many :participants
+
   before_create :set_token
 
   def set_token
@@ -10,9 +12,10 @@ class Event < ApplicationRecord
       token: token,
       title: title,
       description: description,
-      date: date.to_s,
-      participants: [],
+      date: Tolymer::V1::Date.new(year: date.year, month: date.month, day: date.day),
+      participants: participants.map(&:to_proto),
       games: [],
+      tips: [],
     )
   end
 end

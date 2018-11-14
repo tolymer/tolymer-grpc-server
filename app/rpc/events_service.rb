@@ -7,6 +7,17 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def create_event
+    m = request.message
+    event = Event.create!(
+      title: m.title,
+      description: m.description,
+      date: Date.new(m.date.year, m.date.month, m.date.day),
+    )
+    m.participants.each do |name|
+      event.participants.create!(name: name)
+    end
+
+    event.to_proto
   end
 
   def update_event
