@@ -10,6 +10,10 @@ service Events {
   rpc CreateEvent (CreateEventRequest) returns (Event);
   rpc UpdateEvent (UpdateEventRequest) returns (Event);
 
+  rpc CreateParticipant (CreateParticipantRequest) returns (Participant);
+  rpc UpdateParticipant (UpdateParticipantRequest) returns (Participant);
+  rpc DeleteParticipant (DeleteParticipantRequest) returns (google.protobuf.Empty);
+
   rpc CreateGame (CreateGameRequest) returns (Game);
   rpc UpdateGame (UpdateGameRequest) returns (Game);
   rpc DeleteGame (DeleteGameRequest) returns (google.protobuf.Empty);
@@ -44,6 +48,23 @@ message UpdateEventRequest {
   google.protobuf.FieldMask update_mask = 5;
 }
 
+message CreateParticipantRequest {
+  string event_token = 1;
+  string name = 2;
+}
+
+message UpdateParticipantRequest {
+  string event_token = 1;
+  int64 participant_id = 2;
+  string name = 3;
+  google.protobuf.FieldMask update_mask = 4;
+}
+
+message DeleteParticipantRequest {
+  string event_token = 1;
+  int64 participant_id = 2;
+}
+
 message CreateGameRequest {
   string event_token = 1;
   repeated Score scores = 2;
@@ -52,6 +73,7 @@ message CreateGameRequest {
 message UpdateGameRequest {
   string event_token = 1;
   Game game = 2;
+  google.protobuf.FieldMask update_mask = 3;
 }
 
 message DeleteGameRequest {
@@ -67,6 +89,7 @@ message CreateTipRequest {
 message UpdateTipRequest {
   string event_token = 1;
   repeated Tip tips = 2;
+  google.protobuf.FieldMask update_mask = 3;
 }
 
 message DeleteTipRequest {

@@ -7,13 +7,12 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def create_event
-    m = request.message
     event = Event.create!(
-      title: m.title,
-      description: m.description,
-      date: m.date ? Date.new(m.date.year, m.date.month, m.date.day) : nil,
+      title: message.title,
+      description: message.description,
+      date: message.date ? Date.new(message.date.year, message.date.month, message.date.day) : nil,
     )
-    m.participants.each do |name|
+    message.participants.each do |name|
       event.participants.create!(name: name)
     end
 
@@ -23,29 +22,57 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def update_event
-    m = request.message
+    update_mask = fetch_update_mask
     event = find_event
 
-    if m.update_mask.nil? || m.update_mask.paths.blank?
-      fail!(:bad_request, 'update_mask is required.')
+    if update_mask.paths.include?('title') && message.title.present?
+      event.title = message.title
     end
 
-    if m.update_mask.paths.include?('title') && m.title.present?
-      event.title = m.title
+    if update_mask.paths.include?('description')
+      event.description = message.description || ''
     end
 
-    if m.update_mask.paths.include?('description')
-      event.description = m.description || ''
-    end
-
-    if m.update_mask.paths.include?('date') && !m.date.nil?
-      event.date = Date.new(m.date.year, m.date.month, m.date.day)
+    if update_mask.paths.include?('date') && !message.date.nil?
+      event.date = Date.new(message.date.year, message.date.month, message.date.day)
     end
 
     event.save!
     event.to_proto
   rescue ActiveRecord::RecordInvalid => err
     fail!(:bad_request, err.message)
+  end
+
+  def create_participant
+    event = find_event
+    participant = event.participants.create!(name: message.name)
+    participant.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
+  end
+
+  def update_participant
+    event = find_event
+    participant = event.participants.find(message.participant_id)
+    update_mask = fetch_update_mask
+
+    if update_mask.paths.include?('name') && message.name.present?
+      participant.name = message.name
+    end
+
+    participant.save!
+    participant.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
+  end
+
+  def delete_participant
+    event = find_event
+    participant = event.participants.find(message.participant_id)
+    participant.destroy!
+    Google::Protobuf::Empty.new
+  rescue ActiveRecord::RecordNotDestroyed => err
+    fail!(:failed_precondition, err.message)
   end
 
   def create_game
@@ -68,9 +95,23 @@ class EventsService < Gruf::Controllers::Base
 
   private
 
+  def message
+    request.message
+  end
+
   def find_event
-    Event.find_by!(token: request.message.event_token)
+    Event.find_by!(token: message.event_token)
   rescue ActiveRecord::RecordNotFound => err
     fail!(:not_found, :event_not_found, 'Invalid event token')
+  end
+
+  def fetch_update_mask
+    update_mask = message.update_mask
+
+    if update_mask.nil? || update_mask.paths.blank?
+      fail!(:bad_request, 'update_mask is required.')
+    end
+
+    update_mask
   end
 end

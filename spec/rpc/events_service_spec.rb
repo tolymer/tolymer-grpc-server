@@ -123,4 +123,86 @@ describe EventsService do
       end
     end
   end
+
+  describe '#create_participant' do
+    let(:rpc_name) { :create_participant }
+    let(:event) { FactoryBot.create(:event) }
+    let(:request_message) do
+      Tolymer::V1::CreateParticipantRequest.new(
+        event_token: event.token,
+        name: 'foo',
+      )
+    end
+
+    it 'creates a participant' do
+      expect(response).to be_a Tolymer::V1::Participant
+      participant = event.participants.first
+      expect(response.id).to eq participant.id
+      expect(response.name).to eq 'foo'
+      expect(participant.name).to eq 'foo'
+      expect(event.participants.size).to eq 1
+    end
+  end
+
+  describe '#update_participant' do
+    let(:rpc_name) { :update_participant }
+    let(:event) { participant.event }
+    let(:participant) { FactoryBot.create(:participant) }
+    let(:request_message) do
+      Tolymer::V1::UpdateParticipantRequest.new(
+        event_token: event.token,
+        participant_id: participant.id,
+        name: 'foo',
+        update_mask: Google::Protobuf::FieldMask.new(paths: ['name']),
+      )
+    end
+
+    it 'updates the participant' do
+      expect(response).to be_a Tolymer::V1::Participant
+      expect(response.id).to eq participant.id
+      expect(response.name).to eq 'foo'
+      expect(participant.reload.name).to eq 'foo'
+    end
+  end
+
+  describe '#delete_participant' do
+    let(:rpc_name) { :delete_participant }
+    let(:event) { participant.event }
+    let(:participant) { FactoryBot.create(:participant) }
+    let(:request_message) do
+      Tolymer::V1::UpdateParticipantRequest.new(
+        event_token: event.token,
+        participant_id: participant.id,
+      )
+    end
+
+    context 'when participant has scores' do
+      before do
+        participant.scores.create!(game_id: 1, point: 10)
+      end
+
+      it 'raises GRPC::FailedPrecondition' do
+        expect { response }.to raise_error GRPC::FailedPrecondition
+        expect(event.participants.count).to eq 1
+      end
+    end
+
+    context 'when participant has tips' do
+      before do
+        participant.tips.create!(event_id: event.id, point: 10)
+      end
+
+      it 'raises GRPC::FailedPrecondition' do
+        expect { response }.to raise_error GRPC::FailedPrecondition
+        expect(event.participants.count).to eq 1
+      end
+    end
+
+    context 'when participant does not have scores and tips' do
+      it 'deletes the participant' do
+        expect(response).to be_a Google::Protobuf::Empty
+        expect(event.participants.count).to eq 0
+      end
+    end
+  end
 end
