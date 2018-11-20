@@ -76,21 +76,61 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def create_game
+    event = find_event
+    game = Game.create_with_results!(event_id: event.id, results: message.results)
+    game.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def update_game
+    event = find_event
+    game = event.games.find(message.game_id)
+    update_mask = fetch_update_mask
+
+    if update_mask.paths.include?('results') && message.results.present?
+      game.replace_results!(message.results)
+    end
+
+    game.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def delete_game
+    event = find_event
+    game = event.games.find(message.game_id)
+    game.destroy!
+    Google::Protobuf::Empty.new
   end
 
   def create_tip
+    event = find_event
+    tip = Tip.create_with_results!(event_id: event.id, results: message.results)
+    tip.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def update_tip
+    event = find_event
+    tip = event.tips.find(message.tip_id)
+    update_mask = fetch_update_mask
+
+    if update_mask.paths.include?('results') && message.results.present?
+      tip.replace_results!(message.results)
+    end
+
+    tip.to_proto
+  rescue ActiveRecord::RecordInvalid => err
+    fail!(:bad_request, err.message)
   end
 
   def delete_tip
+    event = find_event
+    tip = event.tips.find(message.tip_id)
+    tip.destroy!
+    Google::Protobuf::Empty.new
   end
 
   private
@@ -101,7 +141,7 @@ class EventsService < Gruf::Controllers::Base
 
   def find_event
     Event.find_by!(token: message.event_token)
-  rescue ActiveRecord::RecordNotFound => err
+  rescue ActiveRecord::RecordNotFound
     fail!(:not_found, :event_not_found, 'Invalid event token')
   end
 

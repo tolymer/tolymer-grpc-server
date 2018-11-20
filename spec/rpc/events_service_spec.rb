@@ -176,9 +176,9 @@ describe EventsService do
       )
     end
 
-    context 'when participant has scores' do
+    context 'when participant has game results' do
       before do
-        participant.scores.create!(game_id: 1, point: 10)
+        participant.game_results.create!(game_id: 1, score: 10, rank: 1)
       end
 
       it 'raises GRPC::FailedPrecondition' do
@@ -187,9 +187,9 @@ describe EventsService do
       end
     end
 
-    context 'when participant has tips' do
+    context 'when participant has tip results' do
       before do
-        participant.tips.create!(event_id: event.id, point: 10)
+        participant.tip_results.create!(tip_id: 1, score: 10)
       end
 
       it 'raises GRPC::FailedPrecondition' do
@@ -198,11 +198,183 @@ describe EventsService do
       end
     end
 
-    context 'when participant does not have scores and tips' do
+    context 'when participant does not have results' do
       it 'deletes the participant' do
         expect(response).to be_a Google::Protobuf::Empty
         expect(event.participants.count).to eq 0
       end
+    end
+  end
+
+  describe '#create_game' do
+    let(:rpc_name) { :create_game }
+    let(:event) { FactoryBot.create(:event) }
+    let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:request_message) do
+      Tolymer::V1::CreateGameRequest.new(
+        event_token: event.token,
+        results: [
+          Tolymer::V1::GameResult.new(participant_id: p1.id, score: -10),
+          Tolymer::V1::GameResult.new(participant_id: p2.id, score: 20),
+          Tolymer::V1::GameResult.new(participant_id: p3.id, score: -50),
+          Tolymer::V1::GameResult.new(participant_id: p4.id, score: 40),
+        ],
+      )
+    end
+
+    it 'creates a game' do
+      expect(response).to be_a Tolymer::V1::Game
+      expect(response.results).to match_array [
+        Tolymer::V1::GameResult.new(participant_id: p1.id, score: -10, rank: 3),
+        Tolymer::V1::GameResult.new(participant_id: p2.id, score: 20, rank: 2),
+        Tolymer::V1::GameResult.new(participant_id: p3.id, score: -50, rank: 4),
+        Tolymer::V1::GameResult.new(participant_id: p4.id, score: 40, rank: 1),
+      ]
+    end
+  end
+
+  describe '#update_game' do
+    let(:rpc_name) { :update_game }
+    let(:event) { FactoryBot.create(:event) }
+    let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:game) do
+      Game.create_with_results!(event_id: event.id, results: [
+        Tolymer::V1::GameResult.new(participant_id: p1.id, score: 100),
+        Tolymer::V1::GameResult.new(participant_id: p2.id, score: -200),
+        Tolymer::V1::GameResult.new(participant_id: p3.id, score: 500),
+        Tolymer::V1::GameResult.new(participant_id: p4.id, score: -400),
+      ])
+    end
+    let(:request_message) do
+      Tolymer::V1::UpdateGameRequest.new(
+        event_token: event.token,
+        game_id: game.id,
+        results: [
+          Tolymer::V1::GameResult.new(participant_id: p1.id, score: -10),
+          Tolymer::V1::GameResult.new(participant_id: p2.id, score: 20),
+          Tolymer::V1::GameResult.new(participant_id: p3.id, score: -50),
+          Tolymer::V1::GameResult.new(participant_id: p4.id, score: 40),
+        ],
+        update_mask: Google::Protobuf::FieldMask.new(paths: ['results']),
+      )
+    end
+
+    it 'updates the game' do
+      expect(response).to be_a Tolymer::V1::Game
+      expect(response.results).to match_array [
+        Tolymer::V1::GameResult.new(participant_id: p1.id, score: -10, rank: 3),
+        Tolymer::V1::GameResult.new(participant_id: p2.id, score: 20, rank: 2),
+        Tolymer::V1::GameResult.new(participant_id: p3.id, score: -50, rank: 4),
+        Tolymer::V1::GameResult.new(participant_id: p4.id, score: 40, rank: 1),
+      ]
+    end
+  end
+
+  describe '#delete_game' do
+    let(:rpc_name) { :delete_game }
+    let(:game) { FactoryBot.create(:game) }
+    let(:request_message) do
+      Tolymer::V1::DeleteGameRequest.new(
+        event_token: game.event.token,
+        game_id: game.id,
+      )
+    end
+
+    it 'deletes the game' do
+      expect(response).to be_a Google::Protobuf::Empty
+      expect(Game.count).to eq 0
+    end
+  end
+
+  describe '#create_tip' do
+    let(:rpc_name) { :create_tip }
+    let(:event) { FactoryBot.create(:event) }
+    let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:request_message) do
+      Tolymer::V1::CreateTipRequest.new(
+        event_token: event.token,
+        results: [
+          Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
+          Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
+          Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
+          Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
+        ],
+      )
+    end
+
+    it 'creates a tip' do
+      expect(response).to be_a Tolymer::V1::Tip
+      expect(response.results).to match_array [
+        Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
+        Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
+        Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
+        Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
+      ]
+    end
+  end
+
+  describe '#update_tip' do
+    let(:rpc_name) { :update_tip }
+    let(:event) { FactoryBot.create(:event) }
+    let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
+    let(:tip) do
+      Tip.create_with_results!(event_id: event.id, results: [
+        Tolymer::V1::TipResult.new(participant_id: p1.id, score: 100),
+        Tolymer::V1::TipResult.new(participant_id: p2.id, score: -200),
+        Tolymer::V1::TipResult.new(participant_id: p3.id, score: 500),
+        Tolymer::V1::TipResult.new(participant_id: p4.id, score: -400),
+      ])
+    end
+    let(:request_message) do
+      Tolymer::V1::UpdateTipRequest.new(
+        event_token: event.token,
+        tip_id: tip.id,
+        results: [
+          Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
+          Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
+          Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
+          Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
+        ],
+        update_mask: Google::Protobuf::FieldMask.new(paths: ['results']),
+      )
+    end
+
+    it 'updates the tip' do
+      expect(response).to be_a Tolymer::V1::Tip
+      expect(response.results).to match_array [
+        Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
+        Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
+        Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
+        Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
+      ]
+    end
+  end
+
+  describe '#delete_tip' do
+    let(:rpc_name) { :delete_tip }
+    let(:tip) { FactoryBot.create(:tip) }
+    let(:request_message) do
+      Tolymer::V1::DeleteTipRequest.new(
+        event_token: tip.event.token,
+        tip_id: tip.id,
+      )
+    end
+
+    it 'deletes the tip' do
+      expect(response).to be_a Google::Protobuf::Empty
+      expect(Tip.count).to eq 0
     end
   end
 end

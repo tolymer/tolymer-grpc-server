@@ -1,16 +1,14 @@
 class Event < ApplicationRecord
   MAX_TITLE_LENGTH = 100
 
-  has_many :participants
+  has_many :participants, dependent: :destroy
+  has_many :games, dependent: :destroy
+  has_many :tips, dependent: :destroy
 
   validates :title, presence: true, length: { maximum: MAX_TITLE_LENGTH }
   validates :date, presence: true
 
   before_create :set_token
-
-  def set_token
-    self.token ||= SecureRandom.hex(20)
-  end
 
   def to_proto
     Tolymer::V1::Event.new(
@@ -20,7 +18,12 @@ class Event < ApplicationRecord
       date: Tolymer::V1::Date.new(year: date.year, month: date.month, day: date.day),
       participants: participants.map(&:to_proto),
       games: [],
-      tips: [],
     )
+  end
+
+  private
+
+  def set_token
+    self.token ||= SecureRandom.hex(20)
   end
 end

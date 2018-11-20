@@ -1,8 +1,8 @@
 class Participant < ApplicationRecord
   MAX_NAME_LENGTH = 50
 
-  has_many :tips
-  has_many :scores
+  has_many :game_results
+  has_many :tip_results
   belongs_to :event
 
   validates :name, presence: true, length: { maximum: MAX_NAME_LENGTH }
@@ -16,7 +16,7 @@ class Participant < ApplicationRecord
   private
 
   def check_scores_for_destroy
-    if scores.exists? || tips.exists?
+    if game_results.exists? || tip_results.exists?
       throw :abort
     end
   end

@@ -4,6 +4,7 @@ package tolymer.v1;
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
 
 service Events {
   rpc GetEvent (GetEventRequest) returns (Event);
@@ -67,13 +68,14 @@ message DeleteParticipantRequest {
 
 message CreateGameRequest {
   string event_token = 1;
-  repeated Score scores = 2;
+  repeated GameResult results = 2;
 }
 
 message UpdateGameRequest {
   string event_token = 1;
-  Game game = 2;
-  google.protobuf.FieldMask update_mask = 3;
+  int64 game_id = 2;
+  repeated GameResult results = 3;
+  google.protobuf.FieldMask update_mask = 4;
 }
 
 message DeleteGameRequest {
@@ -83,17 +85,19 @@ message DeleteGameRequest {
 
 message CreateTipRequest {
   string event_token = 1;
-  repeated Tip tips = 2;
+  repeated TipResult results = 2;
 }
 
 message UpdateTipRequest {
   string event_token = 1;
-  repeated Tip tips = 2;
-  google.protobuf.FieldMask update_mask = 3;
+  int64 tip_id = 2;
+  repeated TipResult results = 3;
+  google.protobuf.FieldMask update_mask = 4;
 }
 
 message DeleteTipRequest {
   string event_token = 1;
+  int64 tip_id = 2;
 }
 
 message Event {
@@ -114,15 +118,25 @@ message Participant {
 message Game {
   int64 id = 1;
   string event_token = 2;
-  repeated Score scores = 3;
+  google.protobuf.Timestamp created_at = 3;
+  int32 rank = 4;
+  repeated GameResult results = 5;
 }
 
-message Score {
+message GameResult {
   int64 participant_id = 1;
-  float point = 2;
+  int32 rank = 2;
+  float score = 3;
 }
 
 message Tip {
+  int64 id = 1;
+  string event_token = 2;
+  google.protobuf.Timestamp created_at = 3;
+  repeated TipResult results = 4;
+}
+
+message TipResult {
   int64 participant_id = 1;
-  float point = 2;
+  float score = 2;
 }
