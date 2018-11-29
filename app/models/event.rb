@@ -17,7 +17,8 @@ class Event < ApplicationRecord
       description: description,
       date: Tolymer::V1::Date.new(year: date.year, month: date.month, day: date.day),
       participants: participants.map(&:to_proto),
-      games: [],
+      games: games.map(&:to_proto),
+      tips: tips.map(&:to_proto),
     )
   end
 
