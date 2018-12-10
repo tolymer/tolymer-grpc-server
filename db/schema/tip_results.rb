@@ -1,5 +1,5 @@
 create_table 'tip_results', force: :cascade do |t|
-  t.bigint  'tip_id',        null: false
+  t.bigint  'tip_id',         null: false
   t.bigint  'participant_id', null: false
   t.decimal 'score',          null: false, precision: 6, scale: 1
 

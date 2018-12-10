@@ -30,7 +30,7 @@ describe EventsService do
       ])
     end
     let!(:tip) do
-      Tip.create_with_results!(event_id: event.id, results: [
+      Tip.create_or_replace!(event_id: event.id, results: [
         Tolymer::V1::TipResult.new(participant_id: p1.id, score: 10),
         Tolymer::V1::TipResult.new(participant_id: p2.id, score: -20),
         Tolymer::V1::TipResult.new(participant_id: p3.id, score: 50),
@@ -53,16 +53,13 @@ describe EventsService do
         Tolymer::V1::Participant.new(id: p4.id, name: p4.name),
       ]
       expect(response.games[0].id).to eq game.id
-      expect(response.games[0].created_at).to eq Google::Protobuf::Timestamp.new(seconds: game.created_at.to_i)
       expect(response.games[0].results).to match_array [
         Tolymer::V1::GameResult.new(participant_id: p1.id, score: -10, rank: 3),
         Tolymer::V1::GameResult.new(participant_id: p2.id, score: 20, rank: 2),
         Tolymer::V1::GameResult.new(participant_id: p3.id, score: -50, rank: 4),
         Tolymer::V1::GameResult.new(participant_id: p4.id, score: 40, rank: 1),
       ]
-      expect(response.tips[0].id).to eq tip.id
-      expect(response.tips[0].created_at).to eq Google::Protobuf::Timestamp.new(seconds: tip.created_at.to_i)
-      expect(response.tips[0].results).to match_array [
+      expect(response.tip.results).to match_array [
         Tolymer::V1::TipResult.new(participant_id: p1.id, score: 10),
         Tolymer::V1::TipResult.new(participant_id: p2.id, score: -20),
         Tolymer::V1::TipResult.new(participant_id: p3.id, score: 50),
@@ -101,7 +98,7 @@ describe EventsService do
       expect(response.participants.size).to eq 4
       expect(response.participants).to eq event.participants.map(&:to_proto)
       expect(response.games).to eq []
-      expect(response.tips).to eq []
+      expect(response.tip).to eq nil
     end
 
     context 'with invalid params' do
@@ -338,15 +335,15 @@ describe EventsService do
     end
   end
 
-  describe '#create_tip' do
-    let(:rpc_name) { :create_tip }
+  describe '#post_tip' do
+    let(:rpc_name) { :post_tip }
     let(:event) { FactoryBot.create(:event) }
     let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
     let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
     let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
     let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
     let(:request_message) do
-      Tolymer::V1::CreateTipRequest.new(
+      Tolymer::V1::PostTipRequest.new(
         event_token: event.token,
         results: [
           Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
@@ -357,54 +354,38 @@ describe EventsService do
       )
     end
 
-    it 'creates a tip' do
-      expect(response).to be_a Tolymer::V1::Tip
-      expect(response.results).to match_array [
-        Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
-        Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
-        Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
-        Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
-      ]
-    end
-  end
-
-  describe '#update_tip' do
-    let(:rpc_name) { :update_tip }
-    let(:event) { FactoryBot.create(:event) }
-    let(:p1) { FactoryBot.create(:participant, event_id: event.id) }
-    let(:p2) { FactoryBot.create(:participant, event_id: event.id) }
-    let(:p3) { FactoryBot.create(:participant, event_id: event.id) }
-    let(:p4) { FactoryBot.create(:participant, event_id: event.id) }
-    let(:tip) do
-      Tip.create_with_results!(event_id: event.id, results: [
-        Tolymer::V1::TipResult.new(participant_id: p1.id, score: 100),
-        Tolymer::V1::TipResult.new(participant_id: p2.id, score: -200),
-        Tolymer::V1::TipResult.new(participant_id: p3.id, score: 500),
-        Tolymer::V1::TipResult.new(participant_id: p4.id, score: -400),
-      ])
-    end
-    let(:request_message) do
-      Tolymer::V1::UpdateTipRequest.new(
-        event_token: event.token,
-        tip_id: tip.id,
-        results: [
+    context 'with tip does not exist' do
+      it 'creates a tip' do
+        expect(response).to be_a Tolymer::V1::Tip
+        expect(response.results).to match_array [
           Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
           Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
           Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
           Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
-        ],
-        update_mask: Google::Protobuf::FieldMask.new(paths: ['results']),
-      )
+        ]
+      end
     end
 
-    it 'updates the tip' do
-      expect(response).to be_a Tolymer::V1::Tip
-      expect(response.results).to match_array [
-        Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
-        Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
-        Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
-        Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
-      ]
+    context 'when tip exist' do
+      before do
+        results = [
+          Tolymer::V1::TipResult.new(participant_id: p1.id, score: 10),
+          Tolymer::V1::TipResult.new(participant_id: p2.id, score: -20),
+          Tolymer::V1::TipResult.new(participant_id: p3.id, score: 50),
+          Tolymer::V1::TipResult.new(participant_id: p4.id, score: -40),
+        ]
+        Tip.create_or_replace!(event_id: event.id, results: results)
+      end
+
+      it 'updates the tip' do
+        expect(response).to be_a Tolymer::V1::Tip
+        expect(response.results).to match_array [
+          Tolymer::V1::TipResult.new(participant_id: p1.id, score: -10),
+          Tolymer::V1::TipResult.new(participant_id: p2.id, score: 20),
+          Tolymer::V1::TipResult.new(participant_id: p3.id, score: -50),
+          Tolymer::V1::TipResult.new(participant_id: p4.id, score: 40),
+        ]
+      end
     end
   end
 
@@ -412,10 +393,7 @@ describe EventsService do
     let(:rpc_name) { :delete_tip }
     let(:tip) { FactoryBot.create(:tip) }
     let(:request_message) do
-      Tolymer::V1::DeleteTipRequest.new(
-        event_token: tip.event.token,
-        tip_id: tip.id,
-      )
+      Tolymer::V1::DeleteTipRequest.new(event_token: tip.event.token)
     end
 
     it 'deletes the tip' do

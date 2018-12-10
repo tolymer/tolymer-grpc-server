@@ -5,7 +5,6 @@ require 'google/protobuf'
 
 require 'google/protobuf/empty_pb'
 require 'google/protobuf/field_mask_pb'
-require 'google/protobuf/timestamp_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "tolymer.v1.Date" do
     optional :year, :int32, 1
@@ -56,19 +55,12 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :event_token, :string, 1
     optional :game_id, :int64, 2
   end
-  add_message "tolymer.v1.CreateTipRequest" do
+  add_message "tolymer.v1.PostTipRequest" do
     optional :event_token, :string, 1
     repeated :results, :message, 2, "tolymer.v1.TipResult"
   end
-  add_message "tolymer.v1.UpdateTipRequest" do
-    optional :event_token, :string, 1
-    optional :tip_id, :int64, 2
-    repeated :results, :message, 3, "tolymer.v1.TipResult"
-    optional :update_mask, :message, 4, "google.protobuf.FieldMask"
-  end
   add_message "tolymer.v1.DeleteTipRequest" do
     optional :event_token, :string, 1
-    optional :tip_id, :int64, 2
   end
   add_message "tolymer.v1.Event" do
     optional :token, :string, 1
@@ -77,7 +69,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :date, :message, 4, "tolymer.v1.Date"
     repeated :participants, :message, 5, "tolymer.v1.Participant"
     repeated :games, :message, 6, "tolymer.v1.Game"
-    repeated :tips, :message, 7, "tolymer.v1.Tip"
+    optional :tip, :message, 7, "tolymer.v1.Tip"
   end
   add_message "tolymer.v1.Participant" do
     optional :id, :int64, 1
@@ -86,9 +78,8 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "tolymer.v1.Game" do
     optional :id, :int64, 1
     optional :event_token, :string, 2
-    optional :created_at, :message, 3, "google.protobuf.Timestamp"
-    optional :rank, :int32, 4
-    repeated :results, :message, 5, "tolymer.v1.GameResult"
+    optional :rank, :int32, 3
+    repeated :results, :message, 4, "tolymer.v1.GameResult"
   end
   add_message "tolymer.v1.GameResult" do
     optional :participant_id, :int64, 1
@@ -96,10 +87,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :score, :float, 3
   end
   add_message "tolymer.v1.Tip" do
-    optional :id, :int64, 1
-    optional :event_token, :string, 2
-    optional :created_at, :message, 3, "google.protobuf.Timestamp"
-    repeated :results, :message, 4, "tolymer.v1.TipResult"
+    repeated :results, :message, 1, "tolymer.v1.TipResult"
   end
   add_message "tolymer.v1.TipResult" do
     optional :participant_id, :int64, 1
@@ -119,8 +107,7 @@ module Tolymer
     CreateGameRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateGameRequest").msgclass
     UpdateGameRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateGameRequest").msgclass
     DeleteGameRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.DeleteGameRequest").msgclass
-    CreateTipRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateTipRequest").msgclass
-    UpdateTipRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateTipRequest").msgclass
+    PostTipRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.PostTipRequest").msgclass
     DeleteTipRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.DeleteTipRequest").msgclass
     Event = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.Event").msgclass
     Participant = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.Participant").msgclass

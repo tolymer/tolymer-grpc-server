@@ -50,10 +50,6 @@ class Game < ApplicationRecord
   end
 
   def to_proto
-    Tolymer::V1::Game.new(
-      id: id,
-      created_at: Google::Protobuf::Timestamp.new(seconds: created_at.to_i),
-      results: results.map(&:to_proto),
-    )
+    Tolymer::V1::Game.new(id: id, results: results.map(&:to_proto))
   end
 end

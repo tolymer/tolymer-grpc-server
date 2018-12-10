@@ -3,7 +3,7 @@ class Event < ApplicationRecord
 
   has_many :participants, dependent: :destroy
   has_many :games, dependent: :destroy
-  has_many :tips, dependent: :destroy
+  has_one :tip, dependent: :destroy
 
   validates :title, presence: true, length: { maximum: MAX_TITLE_LENGTH }
   validates :date, presence: true
@@ -18,7 +18,7 @@ class Event < ApplicationRecord
       date: Tolymer::V1::Date.new(year: date.year, month: date.month, day: date.day),
       participants: participants.map(&:to_proto),
       games: games.map(&:to_proto),
-      tips: tips.map(&:to_proto),
+      tip: tip&.to_proto,
     )
   end
 

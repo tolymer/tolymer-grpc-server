@@ -24,8 +24,7 @@ module Tolymer
         rpc :CreateGame, CreateGameRequest, Game
         rpc :UpdateGame, UpdateGameRequest, Game
         rpc :DeleteGame, DeleteGameRequest, Google::Protobuf::Empty
-        rpc :CreateTip, CreateTipRequest, Tip
-        rpc :UpdateTip, UpdateTipRequest, Tip
+        rpc :PostTip, PostTipRequest, Tip
         rpc :DeleteTip, DeleteTipRequest, Google::Protobuf::Empty
       end
 

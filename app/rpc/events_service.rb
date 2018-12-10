@@ -104,31 +104,19 @@ class EventsService < Gruf::Controllers::Base
     Google::Protobuf::Empty.new
   end
 
-  def create_tip
+  def post_tip
     event = find_event
-    tip = Tip.create_with_results!(event_id: event.id, results: message.results)
-    tip.to_proto
-  rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
-  end
-
-  def update_tip
-    event = find_event
-    tip = event.tips.find(message.tip_id)
-    update_mask = fetch_update_mask
-
-    if update_mask.paths.include?('results') && message.results.present?
-      tip.replace_results!(message.results)
-    end
-
+    tip = Tip.create_or_replace!(event_id: event.id, results: message.results)
     tip.to_proto
   rescue ActiveRecord::RecordInvalid => err
     fail!(:bad_request, err.message)
   end
 
   def delete_tip
-    event = find_event
-    tip = event.tips.find(message.tip_id)
+    tip = find_event.tip
+    unless tip
+      fail!(:not_found, :tip_not_found, 'Tip does not exist')
+    end
     tip.destroy!
     Google::Protobuf::Empty.new
   end
