@@ -1,0 +1,35 @@
+version: '3.3'
+services:
+  db:
+    image: postgres:10.3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+       - db-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - bundle:/app/vendor/bundle
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      DATABASE_HOST: db
+    tty: true
+    stdin_open: true
+    command: ["script/start.sh"]
+
+  nginx:
+    image: hokaccha/grpc-web-proxy-nginx:latest
+    ports:
+      - '8080:8080'
+
+volumes:
+  db-data:
+  bundle:
