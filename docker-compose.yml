@@ -11,7 +11,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     depends_on:
       - db
     volumes:
@@ -23,7 +23,6 @@ services:
       DATABASE_HOST: db
     tty: true
     stdin_open: true
-    command: ["script/start.sh"]
 
   nginx:
     image: hokaccha/grpc-web-proxy-nginx:latest

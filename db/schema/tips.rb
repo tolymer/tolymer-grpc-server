@@ -4,4 +4,4 @@ create_table 'tips', force: :cascade do |t|
   t.timestamps
 end
 
-add_index 'tips', 'event_id', using: :btree
+add_index 'tips', 'event_id', unique: true, using: :btree

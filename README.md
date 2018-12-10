@@ -1,24 +1,22 @@
-# README
+# tolymer-grpc-server
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## development
 
-Things you may want to cover:
+Setup and start server:
 
-* Ruby version
+```
+$ bin/setup
+$ docker-compose up
+```
 
-* System dependencies
+Reload application:
 
-* Configuration
+```
+$ docker-compose restart app
+```
 
-* Database creation
+Run tests:
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```
+$ docker-compose exec app bin/rspec
+```
