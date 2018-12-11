@@ -115,7 +115,7 @@ message Game {
 message GameResult {
   int64 participant_id = 1;
   int32 rank = 2;
-  float score = 3;
+  double score = 3;
 }
 
 message Tip {
@@ -124,5 +124,5 @@ message Tip {
 
 message TipResult {
   int64 participant_id = 1;
-  float score = 2;
+  double score = 2;
 }

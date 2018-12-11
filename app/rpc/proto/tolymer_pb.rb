@@ -84,14 +84,14 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "tolymer.v1.GameResult" do
     optional :participant_id, :int64, 1
     optional :rank, :int32, 2
-    optional :score, :float, 3
+    optional :score, :double, 3
   end
   add_message "tolymer.v1.Tip" do
     repeated :results, :message, 1, "tolymer.v1.TipResult"
   end
   add_message "tolymer.v1.TipResult" do
     optional :participant_id, :int64, 1
-    optional :score, :float, 2
+    optional :score, :double, 2
   end
 end
 
