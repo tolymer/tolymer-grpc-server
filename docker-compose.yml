@@ -17,6 +17,8 @@ services:
     volumes:
       - .:/app
       - bundle:/app/vendor/bundle
+    ports:
+      - '8000:8000'
     environment:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: password
