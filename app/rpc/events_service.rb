@@ -8,9 +8,7 @@ class EventsService < Gruf::Controllers::Base
 
   def create_event
     event = Event.create_with_participants!(
-      title: message.title,
       description: message.description,
-      date: message.date,
       participants: message.participants,
     )
 
@@ -23,16 +21,8 @@ class EventsService < Gruf::Controllers::Base
     update_mask = fetch_update_mask
     event = find_event
 
-    if update_mask.paths.include?('title') && message.title.present?
-      event.title = message.title
-    end
-
     if update_mask.paths.include?('description')
       event.description = message.description || ''
-    end
-
-    if update_mask.paths.include?('date') && !message.date.nil?
-      event.date = Date.new(message.date.year, message.date.month, message.date.day)
     end
 
     event.save!

@@ -20,29 +20,19 @@ service Events {
   rpc DeleteTip (DeleteTipRequest) returns (google.protobuf.Empty);
 }
 
-message Date {
-  int32 year = 1;
-  int32 month = 2;
-  int32 day = 3;
-}
-
 message GetEventRequest {
   string event_token = 1;
 }
 
 message CreateEventRequest {
-  string title = 1;
-  string description = 2;
-  Date date = 3;
-  repeated string participants = 4;
+  string description = 1;
+  repeated string participants = 2;
 }
 
 message UpdateEventRequest {
   string event_token = 1;
-  string title = 2;
-  string description = 3;
-  Date date = 4;
-  google.protobuf.FieldMask update_mask = 5;
+  string description = 2;
+  google.protobuf.FieldMask update_mask = 3;
 }
 
 message UpdateParticipantsRequest {
@@ -97,12 +87,10 @@ message DeleteTipRequest {
 
 message Event {
   string token = 1;
-  string title = 2;
-  string description = 3;
-  Date date = 4;
-  repeated Participant participants = 5;
-  repeated Game games = 6;
-  Tip tip = 7;
+  string description = 2;
+  repeated Participant participants = 3;
+  repeated Game games = 4;
+  Tip tip = 5;
 }
 
 message Participant {
