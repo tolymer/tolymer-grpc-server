@@ -10,9 +10,7 @@ service Events {
   rpc CreateEvent (CreateEventRequest) returns (Event);
   rpc UpdateEvent (UpdateEventRequest) returns (Event);
 
-  rpc CreateParticipant (CreateParticipantRequest) returns (Participant);
-  rpc UpdateParticipant (UpdateParticipantRequest) returns (Participant);
-  rpc DeleteParticipant (DeleteParticipantRequest) returns (google.protobuf.Empty);
+  rpc UpdateParticipants (UpdateParticipantsRequest) returns (google.protobuf.Empty);
 
   rpc CreateGame (CreateGameRequest) returns (Game);
   rpc UpdateGame (UpdateGameRequest) returns (Game);
@@ -45,6 +43,13 @@ message UpdateEventRequest {
   string description = 3;
   Date date = 4;
   google.protobuf.FieldMask update_mask = 5;
+}
+
+message UpdateParticipantsRequest {
+  string event_token = 1;
+  repeated Participant renaming_participants = 2;
+  repeated string adding_names = 3;
+  repeated int64 deleting_ids = 4;
 }
 
 message CreateParticipantRequest {

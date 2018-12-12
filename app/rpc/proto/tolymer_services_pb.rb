@@ -18,9 +18,7 @@ module Tolymer
         rpc :GetEvent, GetEventRequest, Event
         rpc :CreateEvent, CreateEventRequest, Event
         rpc :UpdateEvent, UpdateEventRequest, Event
-        rpc :CreateParticipant, CreateParticipantRequest, Participant
-        rpc :UpdateParticipant, UpdateParticipantRequest, Participant
-        rpc :DeleteParticipant, DeleteParticipantRequest, Google::Protobuf::Empty
+        rpc :UpdateParticipants, UpdateParticipantsRequest, Google::Protobuf::Empty
         rpc :CreateGame, CreateGameRequest, Game
         rpc :UpdateGame, UpdateGameRequest, Game
         rpc :DeleteGame, DeleteGameRequest, Google::Protobuf::Empty

@@ -167,85 +167,33 @@ describe EventsService do
     end
   end
 
-  describe '#create_participant' do
-    let(:rpc_name) { :create_participant }
+  describe '#update_participants' do
+    let(:rpc_name) { :update_participants }
     let(:event) { FactoryBot.create(:event) }
+    let!(:p1) { FactoryBot.create(:participant, event_id: event.id, name: 'p1') }
+    let!(:p2) { FactoryBot.create(:participant, event_id: event.id, name: 'p2') }
+    let!(:p3) { FactoryBot.create(:participant, event_id: event.id, name: 'p3') }
+    let!(:p4) { FactoryBot.create(:participant, event_id: event.id, name: 'p4') }
     let(:request_message) do
-      Tolymer::V1::CreateParticipantRequest.new(
+      Tolymer::V1::UpdateParticipantsRequest.new(
         event_token: event.token,
-        name: 'foo',
+        renaming_participants: [
+          Tolymer::V1::Participant.new(id: p1.id, name: p1.name),
+          Tolymer::V1::Participant.new(id: p2.id, name: 'renamed p2'),
+        ],
+        adding_names: ['new 1'],
+        deleting_ids: [p3.id],
       )
     end
 
-    it 'creates a participant' do
-      expect(response).to be_a Tolymer::V1::Participant
-      participant = event.participants.first
-      expect(response.id).to eq participant.id
-      expect(response.name).to eq 'foo'
-      expect(participant.name).to eq 'foo'
-      expect(event.participants.size).to eq 1
-    end
-  end
-
-  describe '#update_participant' do
-    let(:rpc_name) { :update_participant }
-    let(:event) { participant.event }
-    let(:participant) { FactoryBot.create(:participant) }
-    let(:request_message) do
-      Tolymer::V1::UpdateParticipantRequest.new(
-        event_token: event.token,
-        participant_id: participant.id,
-        name: 'foo',
-        update_mask: Google::Protobuf::FieldMask.new(paths: ['name']),
-      )
-    end
-
-    it 'updates the participant' do
-      expect(response).to be_a Tolymer::V1::Participant
-      expect(response.id).to eq participant.id
-      expect(response.name).to eq 'foo'
-      expect(participant.reload.name).to eq 'foo'
-    end
-  end
-
-  describe '#delete_participant' do
-    let(:rpc_name) { :delete_participant }
-    let(:event) { participant.event }
-    let(:participant) { FactoryBot.create(:participant) }
-    let(:request_message) do
-      Tolymer::V1::UpdateParticipantRequest.new(
-        event_token: event.token,
-        participant_id: participant.id,
-      )
-    end
-
-    context 'when participant has game results' do
-      before do
-        participant.game_results.create!(game_id: 1, score: 10, rank: 1)
-      end
-
-      it 'raises GRPC::FailedPrecondition' do
-        expect { response }.to raise_error GRPC::FailedPrecondition
-        expect(event.participants.count).to eq 1
-      end
-    end
-
-    context 'when participant has tip results' do
-      before do
-        participant.tip_results.create!(tip_id: 1, score: 10)
-      end
-
-      it 'raises GRPC::FailedPrecondition' do
-        expect { response }.to raise_error GRPC::FailedPrecondition
-        expect(event.participants.count).to eq 1
-      end
-    end
-
-    context 'when participant does not have results' do
-      it 'deletes the participant' do
-        expect(response).to be_a Google::Protobuf::Empty
-        expect(event.participants.count).to eq 0
-      end
+    it 'update participants' do
+      expect(response).to be_a Google::Protobuf::Empty
+      expect(Participant.count).to eq 4
+      expect(Participant.find(p1.id).name).to eq 'p1'
+      expect(Participant.find(p2.id).name).to eq 'renamed p2'
+      expect(Participant.find_by(id: p3.id)).to eq nil
+      expect(Participant.find(p4.id).name).to eq 'p4'
+      expect(Participant.where(name: 'new 1')).to be_exist
     end
   end
 

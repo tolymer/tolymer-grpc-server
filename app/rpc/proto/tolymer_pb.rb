@@ -27,6 +27,12 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :date, :message, 4, "tolymer.v1.Date"
     optional :update_mask, :message, 5, "google.protobuf.FieldMask"
   end
+  add_message "tolymer.v1.UpdateParticipantsRequest" do
+    optional :event_token, :string, 1
+    repeated :renaming_participants, :message, 2, "tolymer.v1.Participant"
+    repeated :adding_names, :string, 3
+    repeated :deleting_ids, :int64, 4
+  end
   add_message "tolymer.v1.CreateParticipantRequest" do
     optional :event_token, :string, 1
     optional :name, :string, 2
@@ -101,6 +107,7 @@ module Tolymer
     GetEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.GetEventRequest").msgclass
     CreateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateEventRequest").msgclass
     UpdateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateEventRequest").msgclass
+    UpdateParticipantsRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateParticipantsRequest").msgclass
     CreateParticipantRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateParticipantRequest").msgclass
     UpdateParticipantRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateParticipantRequest").msgclass
     DeleteParticipantRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.DeleteParticipantRequest").msgclass

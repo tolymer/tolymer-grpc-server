@@ -7,18 +7,16 @@ class EventsService < Gruf::Controllers::Base
   end
 
   def create_event
-    event = Event.create!(
+    event = Event.create_with_participants!(
       title: message.title,
       description: message.description,
-      date: message.date ? Date.new(message.date.year, message.date.month, message.date.day) : nil,
+      date: message.date,
+      participants: message.participants,
     )
-    message.participants.each do |name|
-      event.participants.create!(name: name)
-    end
 
     event.to_proto
-  rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
+  rescue ActiveRecord::RecordInvalid, Event::InvalidParticipantsNumbers => err
+    fail!(:bad_request, :invalid_parameters, err.message)
   end
 
   def update_event
@@ -40,39 +38,23 @@ class EventsService < Gruf::Controllers::Base
     event.save!
     event.to_proto
   rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
+    fail!(:bad_request, :invalid_parameters, err.message)
   end
 
-  def create_participant
+  def update_participants
     event = find_event
-    participant = event.participants.create!(name: message.name)
-    participant.to_proto
-  rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
-  end
-
-  def update_participant
-    event = find_event
-    participant = event.participants.find(message.participant_id)
-    update_mask = fetch_update_mask
-
-    if update_mask.paths.include?('name') && message.name.present?
-      participant.name = message.name
-    end
-
-    participant.save!
-    participant.to_proto
-  rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
-  end
-
-  def delete_participant
-    event = find_event
-    participant = event.participants.find(message.participant_id)
-    participant.destroy!
+    event.update_participants!(
+      renaming_participants: message.renaming_participants,
+      adding_names: message.adding_names,
+      deleting_ids: message.deleting_ids,
+    )
     Google::Protobuf::Empty.new
+  rescue ActiveRecord::RecordNotFound
+    fail!(:not_found, :event_not_found, 'Invalid event token')
+  rescue ActiveRecord::RecordInvalid, Event::InvalidParticipantsNumbers => err
+    fail!(:bad_request, :invalid_parameters, err.message)
   rescue ActiveRecord::RecordNotDestroyed => err
-    fail!(:failed_precondition, err.message)
+    fail!(:failed_precondition, :invalid_condition, err.message)
   end
 
   def create_game
@@ -80,7 +62,7 @@ class EventsService < Gruf::Controllers::Base
     game = Game.create_with_results!(event_id: event.id, results: message.results)
     game.to_proto
   rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
+    fail!(:bad_request, :invalid_parameters, err.message)
   end
 
   def update_game
@@ -94,7 +76,7 @@ class EventsService < Gruf::Controllers::Base
 
     game.to_proto
   rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
+    fail!(:bad_request, :invalid_parameters, err.message)
   end
 
   def delete_game
@@ -109,7 +91,7 @@ class EventsService < Gruf::Controllers::Base
     tip = Tip.create_or_replace!(event_id: event.id, results: message.results)
     tip.to_proto
   rescue ActiveRecord::RecordInvalid => err
-    fail!(:bad_request, err.message)
+    fail!(:bad_request, :invalid_parameters, err.message)
   end
 
   def delete_tip
@@ -137,7 +119,7 @@ class EventsService < Gruf::Controllers::Base
     update_mask = message.update_mask
 
     if update_mask.nil? || update_mask.paths.blank?
-      fail!(:bad_request, 'update_mask is required.')
+      fail!(:bad_request, :invalid_parameters, 'update_mask is required.')
     end
 
     update_mask
