@@ -100,9 +100,7 @@ message Participant {
 
 message Game {
   int64 id = 1;
-  string event_token = 2;
-  int32 rank = 3;
-  repeated GameResult results = 4;
+  repeated GameResult results = 2;
 }
 
 message GameResult {

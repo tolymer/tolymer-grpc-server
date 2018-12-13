@@ -72,9 +72,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   end
   add_message "tolymer.v1.Game" do
     optional :id, :int64, 1
-    optional :event_token, :string, 2
-    optional :rank, :int32, 3
-    repeated :results, :message, 4, "tolymer.v1.GameResult"
+    repeated :results, :message, 2, "tolymer.v1.GameResult"
   end
   add_message "tolymer.v1.GameResult" do
     optional :participant_id, :int64, 1
