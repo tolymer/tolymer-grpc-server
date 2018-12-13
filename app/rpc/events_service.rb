@@ -40,7 +40,7 @@ class EventsService < Gruf::Controllers::Base
     )
     Google::Protobuf::Empty.new
   rescue ActiveRecord::RecordNotFound
-    fail!(:not_found, :event_not_found, 'Invalid event token')
+    fail!(:not_found, :participant_not_found, 'Participant not found')
   rescue ActiveRecord::RecordInvalid, Event::InvalidParticipantsNumbers => err
     fail!(:bad_request, :invalid_parameters, err.message)
   rescue ActiveRecord::RecordNotDestroyed => err
@@ -102,7 +102,7 @@ class EventsService < Gruf::Controllers::Base
   def find_event
     Event.find_by!(token: message.event_token)
   rescue ActiveRecord::RecordNotFound
-    fail!(:not_found, :event_not_found, 'Invalid event token')
+    fail!(:not_found, :event_not_found, 'Event not found')
   end
 
   def fetch_update_mask
