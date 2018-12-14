@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+docker run  --rm -it -p '8080:8080' --env 'NGINX_GRPC_PASS=host.docker.internal:8000' \
+  hokaccha/grpc-web-proxy-nginx:latest \
+  /bin/sh -c '
+    envsubst '\''$$NGINX_GRPC_PASS'\'' \
+    < /etc/nginx/conf.d/grpc_proxy.conf.template \
+    > /etc/nginx/conf.d/grpc_proxy.conf \
+    && nginx -g "daemon off;"
+  '
