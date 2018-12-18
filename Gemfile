@@ -4,6 +4,7 @@ gem 'rails', '5.2.1'
 gem 'pg'
 gem 'ridgepole'
 gem 'gruf'
+gem 'dotenv-rails'
 
 group :development, :test do
   gem 'pry-byebug'
