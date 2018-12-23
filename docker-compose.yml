@@ -28,8 +28,14 @@ services:
 
   nginx:
     image: hokaccha/grpc-web-proxy-nginx:latest
+    environment:
+      NGINX_GRPC_PASS: app:8000
     ports:
       - '8080:8080'
+    command: >
+      /bin/sh -c
+      "envsubst '$$NGINX_GRPC_PASS' < /etc/nginx/conf.d/grpc_proxy.conf.template > /etc/nginx/conf.d/grpc_proxy.conf
+      && nginx -g 'daemon off;'"
 
 volumes:
   db-data:
