@@ -7,7 +7,7 @@ class Event < ApplicationRecord
 
   before_create :set_token
 
-  def self.create_with_participants!(description:, participants:)
+  def self.create_with_participants!(description:, participants:, event_date:)
     participants = participants.reject(&:blank?)
 
     if participants.size != 4
@@ -15,7 +15,7 @@ class Event < ApplicationRecord
     end
 
     transaction do
-      event = create!(description: description)
+      event = create!(description: description, event_date: event_date)
 
       participants.each do |name|
         event.participants.create!(name: name.strip)
@@ -51,6 +51,7 @@ class Event < ApplicationRecord
     Tolymer::V1::Event.new(
       token: token,
       description: description,
+      event_date: ProtobufType.date_to_proto(event_date),
       participants: participants.order(:id).map(&:to_proto),
       games: games.map(&:to_proto),
       tip: tip&.to_proto,

@@ -10,6 +10,7 @@ class EventsService < Gruf::Controllers::Base
     event = Event.create_with_participants!(
       description: message.description,
       participants: message.participants,
+      event_date: ProtobufType.proto_to_date(message.event_date),
     )
 
     event.to_proto
@@ -23,6 +24,10 @@ class EventsService < Gruf::Controllers::Base
 
     if update_mask.paths.include?('description')
       event.description = message.description || ''
+    end
+
+    if update_mask.paths.include?('event_date')
+      event.event_date = ProtobufType.proto_to_date(message.event_date)
     end
 
     event.save!

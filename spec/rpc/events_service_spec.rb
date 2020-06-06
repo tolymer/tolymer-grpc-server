@@ -42,6 +42,7 @@ describe EventsService do
     it 'returns a Event' do
       expect(response).to be_a Tolymer::V1::Event
       expect(response.description).to eq event.description
+      expect(response.event_date).to eq ProtobufType.date_to_proto(event.event_date)
       expect(response.participants).to match_array [
         Tolymer::V1::Participant.new(id: p1.id, name: p1.name),
         Tolymer::V1::Participant.new(id: p2.id, name: p2.name),
@@ -77,6 +78,7 @@ describe EventsService do
       Tolymer::V1::CreateEventRequest.new(
         description: 'test description',
         participants: ['a', 'b', 'c', 'd'],
+        event_date: { year: 2020, month: 6, day: 1 },
       )
     end
 
@@ -85,6 +87,7 @@ describe EventsService do
       event = Event.first
       expect(response.token).to eq event.token
       expect(response.description).to eq event.description
+      expect(response.event_date).to eq ProtobufType.date_to_proto(event.event_date)
       expect(response.participants.size).to eq 4
       expect(response.participants).to eq event.participants.map(&:to_proto)
       expect(response.games).to eq []
@@ -109,7 +112,8 @@ describe EventsService do
       Tolymer::V1::UpdateEventRequest.new(
         event_token: event.token,
         description: 'bar',
-        update_mask: Google::Protobuf::FieldMask.new(paths: ['description']),
+        event_date: { year: 2020, month: 6, day: 1 },
+        update_mask: Google::Protobuf::FieldMask.new(paths: ['description', 'event_date']),
       )
     end
 
@@ -117,6 +121,7 @@ describe EventsService do
       expect(response).to be_a Tolymer::V1::Event
       event.reload
       expect(event.description).to eq 'bar'
+      expect(event.event_date).to eq Date.new(2020, 6, 1)
     end
 
     context 'without update_mask' do

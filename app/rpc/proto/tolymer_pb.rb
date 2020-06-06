@@ -6,17 +6,24 @@ require 'google/protobuf'
 require 'google/protobuf/empty_pb'
 require 'google/protobuf/field_mask_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
+  add_message "tolymer.v1.Date" do
+    optional :year, :int32, 1
+    optional :month, :int32, 2
+    optional :day, :int32, 3
+  end
   add_message "tolymer.v1.GetEventRequest" do
     optional :event_token, :string, 1
   end
   add_message "tolymer.v1.CreateEventRequest" do
     optional :description, :string, 1
     repeated :participants, :string, 2
+    optional :event_date, :message, 3, "tolymer.v1.Date"
   end
   add_message "tolymer.v1.UpdateEventRequest" do
     optional :event_token, :string, 1
     optional :description, :string, 2
     optional :update_mask, :message, 3, "google.protobuf.FieldMask"
+    optional :event_date, :message, 4, "tolymer.v1.Date"
   end
   add_message "tolymer.v1.UpdateParticipantsRequest" do
     optional :event_token, :string, 1
@@ -65,6 +72,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     repeated :participants, :message, 3, "tolymer.v1.Participant"
     repeated :games, :message, 4, "tolymer.v1.Game"
     optional :tip, :message, 5, "tolymer.v1.Tip"
+    optional :event_date, :message, 6, "tolymer.v1.Date"
   end
   add_message "tolymer.v1.Participant" do
     optional :id, :int64, 1
@@ -90,6 +98,7 @@ end
 
 module Tolymer
   module V1
+    Date = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.Date").msgclass
     GetEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.GetEventRequest").msgclass
     CreateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.CreateEventRequest").msgclass
     UpdateEventRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("tolymer.v1.UpdateEventRequest").msgclass
